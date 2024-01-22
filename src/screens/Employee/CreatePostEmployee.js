@@ -22,20 +22,22 @@ import Newcard from "../../components/NewCard";
 import jobTitle from "../../configs/jobTitle.json";
 import cityData from "../../configs/cityData.json";
 import { auth, db } from "../../configs/firebase";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import { AuthContext } from "../../provider/AuthProvider";
 
 export default function ({ navigation }) {
   const [profilePicture, SetProfilePicture] = useState(null);
-  const [location, setLocation] = useState(
-    "No:1/153,Puwakwatta,Millewa,Horana"
-  );
+  const [location, setLocation] = useState("");
   const [city, setCity] = useState("");
-  const [salary, setSalary] = useState("3000");
+  const [salary, setSalary] = useState("");
   const [employmentType, setEmploymentType] = useState("Part-Time");
-  const [duration, setDuration] = useState("10");
+  const [duration, setDuration] = useState("");
   const [description, setDescription] = useState("");
   const [selectedJobTitle, setSelectedJobTitle] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(new IndexPath(0));
   const [selectedCityIndex, setSelectedCityIndex] = useState(new IndexPath(0));
+  const { uid } = React.useContext(AuthContext);
 
   const displayValue = jobTitle[selectedIndex.row];
   const displayCityValue = cityData[selectedCityIndex.row].city;
@@ -44,6 +46,30 @@ export default function ({ navigation }) {
     setEmploymentType(
       employmentType === "Part-Time" ? "Full-Time" : "Part-Time"
     );
+  };
+  const publishPost = async () => {
+    try {
+      const publishData = {
+        jobTitle: displayValue,
+        city: displayCityValue,
+        location: location,
+        salary: salary,
+        employmentType: employmentType,
+        duration: duration,
+        description: description,
+        postedTime: firebase.firestore.Timestamp.now(), // Current timestamp
+      };
+      // Create a new document with a unique ID in the 'posts' subcollection for the user
+      await db
+        .collection("yourJobPost")
+        .doc(uid)
+        .collection("posts")
+        .add(publishData);
+      console.log("Post published successfully");
+    } catch (e) {
+      // Replace this with your actual error handling function
+      console.error("Error publishing post:", e);
+    }
   };
 
   return (
@@ -141,6 +167,7 @@ export default function ({ navigation }) {
                 style={styles.publishButton}
                 appearance="outline"
                 status="success"
+                onPress={publishPost}
                 disabled={
                   !selectedJobTitle ||
                   !displayCityValue ||

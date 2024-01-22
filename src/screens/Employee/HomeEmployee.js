@@ -9,7 +9,7 @@ import {
   TouchableNativeFeedback,
   RefreshControl,
 } from "react-native";
-import { Divider, Layout, Text, Button } from "@ui-kitten/components";
+import { Divider, Layout, Text, Button, Avatar } from "@ui-kitten/components";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../../configs/firebase";
 import Screen from "../../components/Screen";
@@ -18,6 +18,29 @@ import { AuthContext } from "../../provider/AuthProvider";
 import { StatusBar } from "expo-status-bar";
 
 const Header = ({ profileImageUrl }) => {
+  const { uid } = React.useContext(AuthContext);
+  const [nickName, setNickName] = useState("");
+
+  useEffect(() => {
+    if (!uid) return;
+
+    const unsubscribe = db
+      .collection("clients")
+      .doc(uid)
+      .onSnapshot((docSnapshot) => {
+        if (docSnapshot.exists) {
+          const nickNameFromDoc = docSnapshot.data().nickName;
+
+          setNickName(nickNameFromDoc);
+        }
+      });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [uid]);
+
+  // Logging Out Function
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -26,7 +49,7 @@ const Header = ({ profileImageUrl }) => {
       console.error("Logout failed", error);
     }
   };
-
+  console.log(nickName);
   return (
     <Layout
       style={{
@@ -36,7 +59,7 @@ const Header = ({ profileImageUrl }) => {
     >
       <Screen>
         <View style={styles.header}>
-          <Image
+          <Avatar
             source={{ uri: profileImageUrl }}
             style={styles.profileImage}
           />
@@ -61,7 +84,7 @@ const Header = ({ profileImageUrl }) => {
                 fontWeight: "bold",
               }}
             >
-              Your Name
+              {nickName}
             </Text>
           </View>
           <Button
@@ -102,25 +125,8 @@ export default function ({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { uid, currentUser, user } = React.useContext(AuthContext);
 
   // console.log("User:", user, "CurrentUser:", currentUser, "Userid:", uid);
-  useEffect(() => {
-    if (!uid) return;
-
-    let dataset;
-      dataset=db
-      .collection("employees")
-      .doc(uid)
-      .onSnapshot((docSnapshot) => {
-       (docSnapshot.exists) {
-          const nickName = docSnapshot.data().nickName;
-          setNickName(nickName);
-        }
-          return () => {
-            dataset
-          }
-       })}),[uid]
 
   useEffect(() => {
     fetchProfileImage();
@@ -131,7 +137,7 @@ export default function ({ navigation }) {
     // Fetch the profile image URL from Firebase Firestore using the user's ID
     // This is a placeholder function, replace with your actual Firebase Firestore fetch logic
     const imageUrl =
-      "https://assets-global.website-files.com/650865454c2393ac25711ff7/650865454c2393ac25714a3e_The%20best%20selfie%20Ideas%20for%20sm%20pfp.jpeg"; // Replace with actual image URL
+      "https://img.freepik.com/premium-vector/avatar-icon002_750950-52.jpg"; // Replace with actual image URL
     setProfileImageUrl(imageUrl);
   };
 
@@ -196,6 +202,7 @@ export default function ({ navigation }) {
       </TouchableNativeFeedback>
     </Layout>
   );
+
   const renderHeader = () => (
     <>
       <Header profileImageUrl={profileImageUrl} />
@@ -240,10 +247,11 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   profileImage: {
-    width: 46,
-    height: 46,
+    marginTop: 3,
+    width: 60,
+    padding: 2,
+    height: 60,
     borderRadius: 23,
-    marginBottom: 5,
   },
   searchBar: {
     marginTop: 5,
