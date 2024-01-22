@@ -1,0 +1,211 @@
+[
+  {
+    "id": "1",
+    "title": "Software Developer",
+    "date": "2024-01-19",
+    "description": "Create and maintain software solutions for diverse applications.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "San Francisco",
+    "salary": "120000",
+    "location": "California, USA"
+  },
+  {
+    "id": "2",
+    "title": "Data Scientist",
+    "date": "2024-01-20",
+    "description": "Apply statistical analysis to extract insights from complex datasets.",
+    "hours": "20",
+    "jobType": "Part-Time",
+    "city": "New York",
+    "salary": "80000",
+    "location": "New York, USA"
+  },
+  {
+    "id": "3",
+    "title": "Product Owner",
+    "date": "2024-01-21",
+    "description": "Drive product development and prioritize feature implementation.",
+    "hours": "35",
+    "jobType": "Full-Time",
+    "city": "Seattle",
+    "salary": "110000",
+    "location": "Washington, USA"
+  },
+  {
+    "id": "4",
+    "title": "UI/UX Designer",
+    "date": "2024-01-22",
+    "description": "Craft visually appealing and user-friendly interfaces.",
+    "hours": "30",
+    "jobType": "Part-Time",
+    "city": "Austin",
+    "salary": "90000",
+    "location": "Texas, USA"
+  },
+  {
+    "id": "5",
+    "title": "Digital Marketer",
+    "date": "2024-01-23",
+    "description": "Develop and execute digital marketing strategies for increased brand visibility.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "Chicago",
+    "salary": "70000",
+    "location": "Illinois, USA"
+  },
+  {
+    "id": "6",
+    "title": "Sales Specialist",
+    "date": "2024-01-24",
+    "description": "Build and manage client relationships to achieve sales targets.",
+    "hours": "38",
+    "jobType": "Full-Time",
+    "city": "Miami",
+    "salary": "60000",
+    "location": "Florida, USA"
+  },
+  {
+    "id": "7",
+    "title": "Content Creator",
+    "date": "2024-01-25",
+    "description": "Produce engaging content for various platforms and audiences.",
+    "hours": "15",
+    "jobType": "Freelance",
+    "city": "Denver",
+    "salary": "50000",
+    "location": "Colorado, USA"
+  },
+  {
+    "id": "8",
+    "title": "IT Security Analyst",
+    "date": "2024-01-26",
+    "description": "Ensure the security of IT systems and protect against cyber threats.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "Boston",
+    "salary": "95000",
+    "location": "Massachusetts, USA"
+  },
+  {
+    "id": "9",
+    "title": "HR Specialist",
+    "date": "2024-01-27",
+    "description": "Handle HR processes and employee relations.",
+    "hours": "37",
+    "jobType": "Full-Time",
+    "city": "San Diego",
+    "salary": "65000",
+    "location": "California, USA"
+  },
+  {
+    "id": "10",
+    "title": "Customer Service Representative",
+    "date": "2024-01-28",
+    "description": "Provide excellent customer support and resolve inquiries.",
+    "hours": "20",
+    "jobType": "Part-Time",
+    "city": "Las Vegas",
+    "salary": "40000",
+    "location": "Nevada, USA"
+  },
+  {
+    "id": "11",
+    "title": "Network Engineer",
+    "date": "2024-01-29",
+    "description": "Design and implement computer networks for optimal performance.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "San Jose",
+    "salary": "110000",
+    "location": "California, USA"
+  },
+  {
+    "id": "12",
+    "title": "Financial Analyst",
+    "date": "2024-01-30",
+    "description": "Analyze financial data and provide insights for informed decision-making.",
+    "hours": "25",
+    "jobType": "Part-Time",
+    "city": "Dallas",
+    "salary": "85000",
+    "location": "Texas, USA"
+  },
+  {
+    "id": "13",
+    "title": "Project Manager",
+    "date": "2024-01-31",
+    "description": "Lead and oversee project development from initiation to completion.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "Los Angeles",
+    "salary": "120000",
+    "location": "California, USA"
+  },
+  {
+    "id": "14",
+    "title": "Social Media Coordinator",
+    "date": "2024-02-01",
+    "description": "Manage social media accounts and create engaging content.",
+    "hours": "18",
+    "jobType": "Part-Time",
+    "city": "Atlanta",
+    "salary": "60000",
+    "location": "Georgia, USA"
+  },
+  {
+    "id": "15",
+    "title": "Quality Assurance Tester",
+    "date": "2024-02-02",
+    "description": "Test software applications for functionality and performance.",
+    "hours": "35",
+    "jobType": "Full-Time",
+    "city": "Houston",
+    "salary": "90000",
+    "location": "Texas, USA"
+  },
+  {
+    "id": "16",
+    "title": "Event Planner",
+    "date": "2024-02-03",
+    "description": "Organize and coordinate events to meet client objectives.",
+    "hours": "30",
+    "jobType": "Part-Time",
+    "city": "Orlando",
+    "salary": "70000",
+    "location": "Florida, USA"
+  },
+  {
+    "id": "17",
+    "title": "Legal Assistant",
+    "date": "2024-02-04",
+    "description": "Provide administrative support to legal professionals.",
+    "hours": "40",
+    "jobType": "Full-Time",
+    "city": "Washington, D.C.",
+    "salary": "75000",
+    "location": "District of Columbia, USA"
+  },
+  {
+    "id": "18",
+    "title": "Graphic Designer",
+    "date": "2024-02-05",
+    "description": "Create visually appealing graphics",
+    "hours": "30",
+    "jobType": "Part-Time",
+    "city": "Orlando",
+    "salary": "70000",
+    "location": "Florida, USA"
+  },
+  {
+    "id": "19",
+    "title": "Graphic Designer",
+    "date": "2024-02-05",
+    "description": "Create visually appealing graphics",
+    "hours": "30",
+    "jobType": "Part-Time",
+    "city": "Orlando",
+    "salary": "70000",
+    "location": "Florida, USA"
+  }
+]
