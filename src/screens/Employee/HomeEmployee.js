@@ -30,7 +30,6 @@ const Header = ({ profileImageUrl }) => {
       .onSnapshot((docSnapshot) => {
         if (docSnapshot.exists) {
           const nickNameFromDoc = docSnapshot.data().nickName;
-
           setNickName(nickNameFromDoc);
         }
       });
@@ -114,6 +113,7 @@ const Header = ({ profileImageUrl }) => {
           </TouchableNativeFeedback>
         </View>
         <Text style={styles.recommendationTitle}>Your Posted Jobs</Text>
+        <Divider />
       </Screen>
       <StatusBar hidden={true} style="auto" />
     </Layout>
@@ -125,26 +125,39 @@ export default function ({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [postedJobs, setPostedJobs] = useState([]);
+  const { uid } = React.useContext(AuthContext);
 
-  // console.log("User:", user, "CurrentUser:", currentUser, "Userid:", uid);
+  const fetchPostedJobs = () => {
+    const unsubscribe = db
+      .collection("yourJobPost")
+      .doc(uid)
+      .collection("posts") // Access the 'posts' subcollection of the user's document
+      .onSnapshot((querySnapshot) => {
+        const postedJobs = [];
+        querySnapshot.forEach((doc) => {
+          postedJobs.push({ id: doc.id, ...doc.data() }); // Collect each job post into an array
+        });
+        setPostedJobs(postedJobs); // Update the state with the array of job posts
+        console.log(postedJobs);
+      });
+    return unsubscribe; // Return the unsubscribe function to call it later for cleanup
+  };
 
   useEffect(() => {
     fetchProfileImage();
     fetchRecommendations();
+    fetchPostedJobs();
   }, []);
+  console.log(postedJobs);
 
   const fetchProfileImage = async () => {
-    // Fetch the profile image URL from Firebase Firestore using the user's ID
-    // This is a placeholder function, replace with your actual Firebase Firestore fetch logic
     const imageUrl =
       "https://img.freepik.com/premium-vector/avatar-icon002_750950-52.jpg"; // Replace with actual image URL
     setProfileImageUrl(imageUrl);
   };
 
   const fetchRecommendations = async () => {
-    // Fetch recommendations from Firebase Firestore
-    // This is a placeholder function, replace with your actual Firebase Firestore fetch logic
-
     setRecommendations(recommendationsData);
   };
 
@@ -156,8 +169,11 @@ export default function ({ navigation }) {
   const renderItem = ({ item }) => (
     <Layout
       style={{
-        paddingHorizontal: 28,
-        paddingBottom: 10,
+        marginHorizontal: 20,
+        paddingVertical: 19,
+        height: 210,
+        margin: 10,
+        paddingBottom: 1,
       }}
     >
       <TouchableNativeFeedback onPress={() => console.log("Pressed item")}>
@@ -172,32 +188,61 @@ export default function ({ navigation }) {
           </Text>
           <Text category="p2">Posed Date: {item.date}</Text>
           <Divider />
-          <Button
-            size="tiny"
-            status="success"
-            appearance="outline"
+          <View
             style={{
-              marginTop: 5,
-              marginBottom: 5,
-              marginRight: 210,
-              category: "p2",
+              alignItems: "flex-start",
+              padding: "1",
+              marginVertical: 2,
             }}
           >
-            Post Details
-          </Button>
-          <Text>{item.hours} Hours </Text>
-          <Text>{item.location} hours</Text>
-          <Text>{item.city}</Text>
+            <Button
+              size="tiny"
+              status="success"
+              appearance="filled"
+              style={{
+                padding: "1",
+              }}
+            >
+              Post Details
+            </Button>
+          </View>
+          <Text category="c1">{item.hours} Hours </Text>
+          <Text category="c1">{item.location} hours</Text>
+          <Text category="c1">{item.city}</Text>
           <Text
-            category="p2"
+            category="c2"
             style={{
               fontWeight: "bold",
               color: "#2CCFA1",
             }}
           >
-            Rs:{item.salary} /= (Per Day)
+            Rs:{item.salary} /~ (Per Day)
           </Text>
           <Text>{item.duration}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+            }}
+          >
+            <Button
+              size="tiny"
+              status="success"
+              appearance="filled"
+              style={{ borderRadius: 25, marginBottom: 3 }}
+            >
+              Application Details
+            </Button>
+            <Button
+              size="tiny"
+              status="danger"
+              appearance="filled"
+              style={{ borderRadius: 25 }}
+            >
+              Edit Post
+            </Button>
+          </View>
         </View>
       </TouchableNativeFeedback>
     </Layout>
@@ -212,7 +257,6 @@ export default function ({ navigation }) {
         value={searchText}
         onChangeText={handleSearch}
       />
-      <Divider />
     </>
   );
 
@@ -259,7 +303,7 @@ const styles = StyleSheet.create({
     borderColor: "darkgray",
     borderRadius: 5,
     padding: 5,
-    margin: 10,
+    marginHorizontal: 19,
   },
   cardImage: {
     width: 360,
@@ -274,11 +318,9 @@ const styles = StyleSheet.create({
     marginTop: 9,
   },
   recommendationItem: {
-    marginTop: 10,
-    padding: 19,
     paddingHorizontal: 15,
     paddingBottom: 10,
-    padding: 10,
+    padding: 6,
     paddingBottom: 5,
     borderWidth: 2,
     borderRadius: 9,
