@@ -102,10 +102,26 @@ export default function ({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { uid, currentUser, user } = React.useContext(AuthContext);
 
-  const context = React.useContext(AuthContext);
-  const user = context.user;
-  console.log(user);
+  // console.log("User:", user, "CurrentUser:", currentUser, "Userid:", uid);
+  useEffect(() => {
+    if (!uid) return;
+
+    let dataset;
+      dataset=db
+      .collection("employees")
+      .doc(uid)
+      .onSnapshot((docSnapshot) => {
+       (docSnapshot.exists) {
+          const nickName = docSnapshot.data().nickName;
+          setNickName(nickName);
+        }
+          return () => {
+            dataset
+          }
+       })}),[uid]
+
   useEffect(() => {
     fetchProfileImage();
     fetchRecommendations();

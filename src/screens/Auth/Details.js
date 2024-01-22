@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import { ScrollView, Image, TouchableOpacity } from "react-native";
-import {
-  Button,
-  Layout,
-  Text,
-  Icon,
-  Input,
-  Datepicker,
-} from "@ui-kitten/components";
+import { Button, Layout, Icon, Input, Datepicker } from "@ui-kitten/components";
 import Screen from "../../components/Screen";
 import * as ImagePicker from "expo-image-picker";
 
