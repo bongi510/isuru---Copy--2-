@@ -13,7 +13,6 @@ import { Divider, Layout, Text, Button, Avatar } from "@ui-kitten/components";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../../configs/firebase";
 import Screen from "../../components/Screen";
-import recommendationsData from "../../configs/recommendationsData.json";
 import { AuthContext } from "../../provider/AuthProvider";
 import { StatusBar } from "expo-status-bar";
 
@@ -125,42 +124,34 @@ export default function ({ navigation }) {
   const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [postedJobs, setPostedJobs] = useState([]);
   const { uid } = React.useContext(AuthContext);
-
-  const fetchPostedJobs = () => {
-    const unsubscribe = db
-      .collection("yourJobPost")
-      .doc(uid)
-      .collection("posts") // Access the 'posts' subcollection of the user's document
-      .onSnapshot((querySnapshot) => {
-        const postedJobs = [];
-        querySnapshot.forEach((doc) => {
-          postedJobs.push({ id: doc.id, ...doc.data() }); // Collect each job post into an array
-        });
-        setPostedJobs(postedJobs); // Update the state with the array of job posts
-        console.log(postedJobs);
-      });
-    return unsubscribe; // Return the unsubscribe function to call it later for cleanup
-  };
 
   useEffect(() => {
     fetchProfileImage();
     fetchRecommendations();
-    fetchPostedJobs();
   }, []);
-  console.log(postedJobs);
 
   const fetchProfileImage = async () => {
     const imageUrl =
-      "https://img.freepik.com/premium-vector/avatar-icon002_750950-52.jpg"; // Replace with actual image URL
+      "https://img.freepik.com/premium-vector/avatar-icon002_750950-52.jpg";
     setProfileImageUrl(imageUrl);
   };
 
   const fetchRecommendations = async () => {
-    setRecommendations(recommendationsData);
+    const unsubscribe = await db
+      .collection("yourJobPost")
+      .doc(uid)
+      .collection("posts")
+      .onSnapshot((querySnapshot) => {
+        const recommendationsData = [];
+        querySnapshot.forEach((doc) => {
+          recommendationsData.push({ id: doc.id, ...doc.data() });
+        });
+        setRecommendations(recommendationsData);
+      });
+    return unsubscribe;
   };
-
+  console.log(recommendations);
   const handleSearch = (text) => {
     setSearchText(text);
     // Add logic to filter the recommendations based on the search text
@@ -170,9 +161,9 @@ export default function ({ navigation }) {
     <Layout
       style={{
         marginHorizontal: 20,
-        paddingVertical: 19,
+        paddingVertical: 15,
         height: 210,
-        margin: 10,
+        margin: 7,
         paddingBottom: 1,
       }}
     >
@@ -184,9 +175,9 @@ export default function ({ navigation }) {
               fontWeight: "bold",
             }}
           >
-            {item.title}
+            {item.jobTitle}
           </Text>
-          <Text category="p2">Posed Date: {item.date}</Text>
+          <Text category="p2">Posed Date: {item.postedtime}</Text>
           <Divider />
           <View
             style={{
@@ -206,7 +197,7 @@ export default function ({ navigation }) {
               Post Details
             </Button>
           </View>
-          <Text category="c1">{item.hours} Hours </Text>
+          <Text category="c1">{item.duration} Hours </Text>
           <Text category="c1">{item.location} hours</Text>
           <Text category="c1">{item.city}</Text>
           <Text
@@ -218,7 +209,6 @@ export default function ({ navigation }) {
           >
             Rs:{item.salary} /~ (Per Day)
           </Text>
-          <Text>{item.duration}</Text>
           <View
             style={{
               flexDirection: "row",
@@ -269,7 +259,12 @@ export default function ({ navigation }) {
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={() => {}} />
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={() => {
+                fetchRecommendations;
+              }}
+            />
           }
           contentContainerStyle={styles.listContainer}
         />
@@ -321,7 +316,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingBottom: 10,
     padding: 6,
-    paddingBottom: 5,
     borderWidth: 2,
     borderRadius: 9,
     borderColor: "gray",
