@@ -13,10 +13,33 @@ import { Divider, Layout, Text, Button } from "@ui-kitten/components";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../../configs/firebase";
 import Screen from "../../components/Screen";
-import recommendationsData from "../../configs/recommendationsData.json";
-import { StatusBar } from "expo-status-bar";
+import { AuthContext } from "../../provider/AuthProvider";
+// import { StatusBar } from "expo-status-bar";
+// import recommendationsData from "../../configs/recommendationsData.json";
 
 const Header = ({ profileImageUrl }) => {
+  const { uid } = React.useContext(AuthContext);
+  const [nickName, setNickName] = useState("");
+
+  useEffect(() => {
+    if (!uid) return;
+
+    const unsubscribe = db
+      .collection("employees")
+      .doc(uid)
+      .onSnapshot((docSnapshot) => {
+        if (docSnapshot.exists) {
+          const nickNameFromDoc = docSnapshot.data().nickName;
+          setNickName(nickNameFromDoc);
+        }
+      });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [uid]);
+
+  // Logging Out Function
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -60,7 +83,7 @@ const Header = ({ profileImageUrl }) => {
                 fontWeight: "bold",
               }}
             >
-              Your Name
+              {nickName}
             </Text>
           </View>
           <Button
@@ -89,9 +112,8 @@ const Header = ({ profileImageUrl }) => {
             />
           </TouchableNativeFeedback>
         </View>
-        <Text style={styles.recommendationTitle}>Your Posted Jobs</Text>
+        <Text style={styles.recommendationTitle}>Recommendation</Text>
       </Screen>
-      <StatusBar hidden={true} style="auto" />
     </Layout>
   );
 };
@@ -116,15 +138,24 @@ export default function Home({ navigation }) {
   };
 
   const fetchRecommendations = async () => {
-    // Fetch recommendations from Firebase Firestore
-    // This is a placeholder function, replace with your actual Firebase Firestore fetch logic
-
-    setRecommendations(recommendationsData);
+    setLoading(true); // Start loading
+    try {
+      const querySnapshot = await db.collection("JobPost").get();
+      const recommendationsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      // Assuming you have a state setter function for storing the fetched posts
+      setRecommendations(recommendationsData);
+    } catch (e) {
+      console.error("Error fetching posts:", e);
+    }
+    setLoading(false); // End loading
   };
+  console.log(recommendations);
 
   const handleSearch = (text) => {
     setSearchText(text);
-    // Add logic to filter the recommendations based on the search text
   };
 
   const renderItem = ({ item }) => (
@@ -137,30 +168,17 @@ export default function Home({ navigation }) {
       <TouchableNativeFeedback onPress={() => console.log("Pressed item")}>
         <View style={styles.recommendationItem}>
           <Text
-            category="h6"
+            category="h5"
             style={{
               fontWeight: "bold",
+              marginBottom: 10,
             }}
           >
-            {item.title}
+            {item.jobTitle}
           </Text>
-          <Text category="p2">Posed Date: {item.date}</Text>
           <Divider />
-          <Button
-            size="tiny"
-            status="success"
-            appearance="outline"
-            style={{
-              marginTop: 5,
-              marginBottom: 5,
-              marginRight: 210,
-              category: "p2",
-            }}
-          >
-            Post Details
-          </Button>
-          <Text>{item.hours} Hours </Text>
-          <Text>{item.location} hours</Text>
+          <Text>{item.duration} Hours </Text>
+          <Text>{item.location}</Text>
           <Text>{item.city}</Text>
           <Text
             category="p2"
@@ -171,7 +189,24 @@ export default function Home({ navigation }) {
           >
             Rs:{item.salary} /= (Per Day)
           </Text>
-          <Text>{item.duration}</Text>
+          <View
+            style={{
+              alignItems: "flex-start",
+            }}
+          >
+            <Button
+              size="tiny"
+              style={{
+                marginHorizontal: 5,
+                padding: 3,
+                marginVertical: 4,
+              }}
+              status={"success"}
+              appearance="outline"
+            >
+              {item.employmentType}
+            </Button>
+          </View>
         </View>
       </TouchableNativeFeedback>
     </Layout>
@@ -195,10 +230,13 @@ export default function Home({ navigation }) {
         <FlatList
           data={recommendations}
           renderItem={renderItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           ListHeaderComponent={renderHeader}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={() => {}} />
+            <RefreshControl
+              refreshing={loading}
+              onRefresh={fetchRecommendations}
+            />
           }
           contentContainerStyle={styles.listContainer}
         />

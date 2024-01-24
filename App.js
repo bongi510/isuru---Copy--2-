@@ -7,9 +7,8 @@ import { AuthProvider } from "./src/provider/AuthProvider";
 import * as eva from "@eva-design/eva";
 import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import { ThemeContext } from "./src/configs/Theme";
-import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
 
 export default function App() {
   React.useEffect(() => {
@@ -33,14 +32,3 @@ export default function App() {
     </>
   );
 }
-// const addData = () => {
-//   db.collection("Chat")
-//     .doc("0AeZz2ca09RwbsknHbFW")
-//     .collection("messages")
-//     .add({
-//       first: "Ada",
-//       last: "Lovelace",
-//       born: 1815,
-//     <Button title='add' onPress={addData} />
-// );
-// }

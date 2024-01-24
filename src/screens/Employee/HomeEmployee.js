@@ -114,7 +114,6 @@ const Header = ({ profileImageUrl }) => {
         <Text style={styles.recommendationTitle}>Your Posted Jobs</Text>
         <Divider />
       </Screen>
-      <StatusBar hidden={true} style="auto" />
     </Layout>
   );
 };
@@ -123,6 +122,8 @@ export default function ({ navigation }) {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
   const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
+  const [filterRecommendations, setFilterRecommendations] =
+    useState(recommendations);
   const [loading, setLoading] = useState(false);
   const { uid } = React.useContext(AuthContext);
 
@@ -138,24 +139,34 @@ export default function ({ navigation }) {
   };
 
   const fetchRecommendations = async () => {
-    const unsubscribe = await db
-      .collection("yourJobPost")
-      .doc(uid)
-      .collection("posts")
-      .onSnapshot((querySnapshot) => {
-        const recommendationsData = [];
-        querySnapshot.forEach((doc) => {
-          recommendationsData.push({ id: doc.id, ...doc.data() });
-        });
-        setRecommendations(recommendationsData);
-      });
-    return unsubscribe;
+    try {
+      const querySnapshot = await db.collection("JobPost").get();
+      const postsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Assuming you have a state setter function for storing the fetched posts
+      setRecommendations(postsData);
+    } catch (e) {
+      console.error("Error fetching posts:", e);
+    }
   };
-  console.log(recommendations);
+
   const handleSearch = (text) => {
     setSearchText(text);
-    // Add logic to filter the recommendations based on the search text
+    if (text) {
+      // Filter the recommendations based on the search text
+      const filteredData = recommendations.filter((item) =>
+        item.jobTitle.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilterRecommendations(filteredData);
+    } else {
+      setFilterRecommendations(recommendations);
+    }
   };
+
+  console.log(recommendations);
 
   const renderItem = ({ item }) => (
     <Layout
@@ -222,7 +233,7 @@ export default function ({ navigation }) {
               appearance="filled"
               style={{ borderRadius: 25, marginBottom: 3 }}
             >
-              Application Details
+              Applicants Details
             </Button>
             <Button
               size="tiny"
@@ -246,6 +257,7 @@ export default function ({ navigation }) {
         placeholder="Search"
         value={searchText}
         onChangeText={handleSearch}
+        autoFocusa
       />
     </>
   );
@@ -254,17 +266,12 @@ export default function ({ navigation }) {
     <Screen>
       <Layout>
         <FlatList
-          data={recommendations}
+          data={filterRecommendations}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={renderHeader}
           refreshControl={
-            <RefreshControl
-              refreshing={loading}
-              onRefresh={() => {
-                fetchRecommendations;
-              }}
-            />
+            <RefreshControl refreshing={loading} onRefresh={handleSearch} />
           }
           contentContainerStyle={styles.listContainer}
         />
@@ -294,6 +301,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     marginTop: 5,
+    paddingLeft: 10,
     borderWidth: 1,
     borderColor: "darkgray",
     borderRadius: 5,

@@ -1,138 +1,149 @@
-import React, { useState } from "react";
-import { StyleSheet, View, TouchableWithoutFeedback } from "react-native";
-import {
-  Input,
-  Button,
-  Icon,
-  Layout,
-  Text,
-  useTheme,
-} from "@ui-kitten/components";
+import React, { useState, useContext } from "react";
+import { ScrollView, Image, TouchableOpacity } from "react-native";
+import { Button, Layout, Icon, Input } from "@ui-kitten/components";
 import Screen from "../../components/Screen";
-import { getAuth, sendPasswordResetEmail } from "firebase/auth";
-import { updateDoc, doc, getFirestore } from "firebase/firestore/lite";
+import * as ImagePicker from "expo-image-picker";
+import defProfilePic from "../../../assets/images/Avatar.png";
+import { db } from "../../configs/firebase";
+import { AuthContext } from "../../provider/AuthProvider";
 
-export default function Profile({ navigation }) {
-  const auth = getAuth();
-  const db = getFirestore();
-  const theme = useTheme();
-  const [name, setName] = useState(""); // Replace with user.name if available
-  const [email, setEmail] = useState(""); // Replace with user.email if available
-  const [visibility, setVisibility] = useState(true);
-  const [loading, setLoading] = useState(false);
+export default function ProfileClient({ navigation }) {
+  const [name, setName] = useState("");
+  const [nickName, setNickName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [profilePicture, setProfilePicture] = useState(defProfilePic);
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const { uid } = useContext(AuthContext);
 
-  const EditIcon = (props) => <Icon {...props} name="edit-2-outline" />;
-  const CancelIcon = (props) => <Icon {...props} name="slash-outline" />;
-  const SaveIcon = (props) => <Icon {...props} name="save-outline" />;
+  const openImagePickerAsync = async () => {
+    let permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-  const resetPassword = async () => {
-    setLoading(true);
-    await sendPasswordResetEmail(auth, email)
-      .then(() => {
-        setLoading(false);
-        alert("Your password reset link has been sent to your email");
-      })
-      .catch((error) => {
-        setLoading(false);
-        alert(error.message);
-      });
+    if (!permissionResult.granted) {
+      alert("Permission to access camera roll is required.");
+      return;
+    }
+
+    let pickerResult = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    // Use "canceled" instead of "cancelled", and access the selected image through the "assets" array
+    if (!pickerResult.canceled) {
+      const selectedImage = pickerResult.assets[0]; // Access the first selected asset
+      setProfilePicture(selectedImage.uri); // Use the "uri" of the first asset
+    }
   };
+  const NextIcon = (props) => (
+    <Icon {...props} name="arrow-ios-forward-outline" />
+  );
+  const type = 1;
+  const EditProfile = async () => {
+    const userData = {
+      name,
+      email,
+      nickName,
+      phoneNumber,
+      password,
+      profilePicture,
+      type,
+    };
 
-  const updateUser = async () => {
-    setLoading(true);
-    const userDocRef = doc(db, "users", auth.currentUser.uid); // Replace "users" with your collection name
-    await updateDoc(userDocRef, {
-      name: name,
-      email: email,
-      // Add other fields to update as needed
-    })
-      .then(() => {
-        setLoading(false);
-        alert("Profile updated successfully");
-        setVisibility(true);
-      })
-      .catch((error) => {
-        setLoading(false);
-        alert(error.message);
-      });
+    try {
+      await db.collection("employees").doc(uid).set(userData);
+      console.log("Profile updated:", uid);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   return (
-    <Screen backAction={() => navigation.goBack()} headerTitle="Profile">
-      <Layout style={styles.container}>
-        <Input
-          style={styles.input}
-          size="large"
-          status="primary"
-          value={name}
-          label="Name"
-          placeholder="Your Name"
-          onChangeText={setName}
-          disabled={visibility}
-        />
-        <Input
-          style={styles.input}
-          size="large"
-          status="primary"
-          value={email}
-          label="Email"
-          placeholder="Your Email"
-          onChangeText={setEmail}
-          disabled={visibility}
-        />
-        {visibility ? (
-          <Button
-            accessoryRight={EditIcon}
-            style={styles.button}
-            status="warning"
-            onPress={() => setVisibility(false)}
-          >
-            Edit
-          </Button>
-        ) : (
-          <View style={styles.buttonGroup}>
-            <Button
-              accessoryRight={CancelIcon}
-              status="basic"
-              onPress={() => setVisibility(true)}
-            >
-              Cancel
-            </Button>
-            <Button
-              accessoryRight={SaveIcon}
-              status="success"
-              onPress={updateUser}
-            >
-              Save
-            </Button>
-          </View>
-        )}
-        <Button
-          style={styles.button}
-          status="danger"
-          onPress={resetPassword}
-          disabled={loading}
+    <Screen backAction={() => navigation.goBack()} headerTitle="Edit Profile">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Layout
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginVertical: "15%",
+          }}
         >
-          {loading ? "Loading..." : "Reset Password"}
-        </Button>
-      </Layout>
+          <TouchableOpacity
+            onPress={openImagePickerAsync}
+            style={{ justifyContent: "center", alignItems: "center" }}
+          >
+            <Image
+              source={
+                typeof profilePicture === "string"
+                  ? { uri: profilePicture }
+                  : profilePicture
+              }
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                marginBottom: 14,
+              }}
+            />
+          </TouchableOpacity>
+          <Input
+            style={{ marginHorizontal: "9%", marginVertical: "2%" }}
+            size="large"
+            status="success"
+            value={name}
+            placeholder="Company Full Name"
+            onChangeText={setName}
+          />
+          <Input
+            style={{ marginHorizontal: "9%", marginVertical: "2%" }}
+            size="large"
+            status="success"
+            value={nickName}
+            placeholder="Organization Name"
+            onChangeText={setNickName}
+          />
+          <Input
+            style={{ marginHorizontal: "9%", marginVertical: "2%" }}
+            size="large"
+            status="success"
+            value={email}
+            autoCapitalize="none"
+            placeholder="Email"
+            onChangeText={setEmail}
+          />
+          <Input
+            style={{ marginHorizontal: "9%", marginVertical: "2%" }}
+            size="large"
+            status="success"
+            value={password}
+            placeholder="Password"
+            secureTextEntry={true}
+            onChangeText={setPassword}
+          />
+          <Input
+            style={{ marginHorizontal: "9%", marginVertical: "2%" }}
+            size="large"
+            status="success"
+            value={phoneNumber}
+            keyboardType="phone-pad"
+            maxLength={10}
+            placeholder="Company Phone Number"
+            onChangeText={setPhoneNumber}
+          />
+          <Button
+            size="large"
+            status="success"
+            style={{ marginTop: 36, marginHorizontal: 50 }}
+            accessoryRight={NextIcon}
+            onPress={EditProfile}
+          >
+            Update Profile
+          </Button>
+        </Layout>
+      </ScrollView>
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-  },
-  input: {
-    marginVertical: 10,
-  },
-  button: {
-    marginVertical: 10,
-  },
-  buttonGroup: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginVertical: 10,
-  },
-});

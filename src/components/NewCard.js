@@ -51,7 +51,7 @@ const NewCard = ({
           </Text>
           <Button
             style={{ marginHorizontal: 19, justifyContent: "center" }}
-            status="success"
+            status={emptype === "Full time" ? "success" : "danger"}
             appearance="outline"
           >
             {emptype}

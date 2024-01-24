@@ -237,7 +237,7 @@ export default function App() {
   const user = context.user;
   const currentUser = context.currentUser;
   const uid = context.uid;
-  // console.log(user, uid, currentUser);
+  console.log(user, uid, currentUser);
 
   return (
     <NavigationContainer>

@@ -57,15 +57,20 @@ export default function ({ navigation }) {
         employmentType: employmentType,
         duration: duration,
         description: description,
+        user: uid,
         postedTime: firebase.firestore.Timestamp.now(), // Current timestamp
       };
       // Create a new document with a unique ID in the 'posts' subcollection for the user
-      await db
-        .collection("yourJobPost")
-        .doc(uid)
-        .collection("posts")
-        .add(publishData);
+      await db.collection("JobPost").add(publishData);
       console.log("Post published successfully");
+      alert("Post published successfully");
+
+      // Reset the state variables
+      setLocation("");
+      setCity("");
+      setSalary("");
+      setDuration("");
+      setDescription("");
     } catch (e) {
       // Replace this with your actual error handling function
       console.error("Error publishing post:", e);
@@ -97,7 +102,7 @@ export default function ({ navigation }) {
             <View
               style={{
                 flexDirection: "column",
-
+                marginHorizontal: "5",
                 alignItems: "left",
               }}
             >
@@ -116,6 +121,9 @@ export default function ({ navigation }) {
                 ))}
               </Select>
               <Select
+                style={{
+                  width: "100%",
+                }}
                 label="City"
                 selectedIndex={selectedCityIndex}
                 value={displayCityValue}
@@ -156,6 +164,7 @@ export default function ({ navigation }) {
               <Button
                 style={{
                   marginTop: 10,
+                  width: "100%",
                 }}
                 status="danger"
                 appearance="outline"
@@ -214,10 +223,11 @@ export default function ({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingVertical: 19,
     paddingBottom: 20,
-    alignItems: "left",
+    alignItems: "stretch",
+    marginHorizontal: 10,
   },
   formContainer: {
     borderWidth: 1,
@@ -225,7 +235,9 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 15,
   },
-  select: {},
+  select: {
+    width: "100%",
+  },
   publishButton: {
     alignItems: "center",
     width: "100%",

@@ -10,6 +10,7 @@ import Onboarding from "react-native-onboarding-swiper";
 import { useNavigation } from "@react-navigation/native";
 import { Layout, Text } from "@ui-kitten/components";
 import Screen from "../../components/Screen";
+import StatusBar from "expo-status-bar";
 
 const { width, height } = Dimensions.get("window");
 
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#ffff",
     width: width,
-    height: height * 0.96,
+    height: height,
   },
   doneButton: {
     backgroundColor: "#2CCFA1",
