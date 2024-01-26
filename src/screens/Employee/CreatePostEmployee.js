@@ -70,9 +70,14 @@ export default function ({ navigation }) {
         postedTime: firebase.firestore.Timestamp.now(), // Current timestamp
       };
 
-      // Create a new document with a unique ID in the 'JobPost' collection
-      await db.collection("JobPost").add(publishData);
-      console.log("Post published successfully");
+      // Add the new job post to the 'JobPost' collection
+      const documentReference = await db.collection("JobPost").add(publishData);
+      const jobId = documentReference.id; // This is the unique ID of the saved job post
+
+      // Update the document with the job ID
+      await documentReference.update({ id: jobId });
+
+      console.log("Post published successfully with ID:", jobId);
       alert("Post published successfully");
 
       // Reset the state variables

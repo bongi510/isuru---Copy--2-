@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   FlatList,
   View,
@@ -13,54 +13,56 @@ import { AuthContext } from "../../provider/AuthProvider";
 
 export default function SavedJobsClient({ navigation }) {
   const [savedJobList, setSavedJobList] = useState([]);
-  const { uid } = React.useContext(AuthContext);
+  const { uid } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  const [jobids, setJobId] = useState([]);
 
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  const ids = useMemo(() => jobids.map((job) => job.id), [jobids]);
-
   async function fetchPosts() {
     setLoading(true);
-      try {
-        // Fetch the client's username from the 'clients' collection
-        const docSnapshot = await db.collection("clients").doc(uid).get();
-        let userName = "";
-        if (docSnapshot.exists) {
-          userName = docSnapshot.data().nickName;
-        }
-      const querySnapshot = await db
+    try {
+      // Fetch the saved job references for the current user
+      const savedJobsSnapshot = await db
         .collection("savedJobs")
         .where("uid", "==", uid)
         .get();
-        let postid = [];
-        if (docSnapshot.exists) {
-          postid = docSnapshot.data().id;
-        }
 
-    const ids = postid.map((postid) => postid.id);
+      // Extract the job post IDs from the saved job references
+      const jobPostIds = savedJobsSnapshot.docs.map((doc) => doc.data().id);
+      console.log(JSON.stringify(jobPostIds, null, "\t"));
+      // Fetch the full job post details for each saved job
 
-    try {
-      const querySnapshot = await db
-        .collection("savedJobPost")
-        .where("id", "==", ids)
-        .get();
+      const jobPostsPromises = jobPostIds.map((jobPostId) =>
+        db.collection("jobPost").doc(jobPostId).get()
+      );
+      console.log(JSON.stringify(jobPostsPromises, null, "\t"));
+      // Resolve all promises to get the job post details
+      const jobPostsSnapshots = await Promise.all(jobPostsPromises);
 
-      const posts = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      // Map over the snapshots to get the job post data
+      const jobPosts = jobPostsSnapshots.map((snapshot) => ({
+        id: snapshot.id,
+        ...snapshot.data(),
       }));
 
-      setSavedJobList(posts);
-      console.log(posts);
+      // Update the state with the fetched job posts
+      setSavedJobList(jobPosts);
     } catch (error) {
-      console.error("Error fetching posts:", error);
+      console.error("Error fetching saved jobs:", error);
     }
     setLoading(false);
   }
+
+  const handleAddToWishlist = async (id, user) => {
+    try {
+      await db.collection("savedJobs").doc(id).delete({ id, user, uid });
+      console.log("Job deleted successfully");
+    } catch (error) {
+      console.error("Error deleted document:", error);
+    }
+  };
 
   const renderItem = ({ item }) => (
     <Layout style={styles.container}>

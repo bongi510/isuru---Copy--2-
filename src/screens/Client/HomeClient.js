@@ -120,7 +120,7 @@ const Header = ({ profileImageUrl }) => {
             />
           </TouchableNativeFeedback>
         </View>
-        <Text style={styles.recommendationTitle}>Recommendation</Text>
+        <Text style={styles.recommendationTitle}>Posted Jobs</Text>
       </Screen>
     </Layout>
   );
