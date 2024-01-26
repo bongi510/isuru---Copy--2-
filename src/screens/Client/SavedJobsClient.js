@@ -1,36 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   FlatList,
   View,
   StyleSheet,
   TouchableNativeFeedback,
+  RefreshControl,
 } from "react-native";
 import { Divider, Layout, Text, Button, Icon } from "@ui-kitten/components";
 import Screen from "../../components/Screen";
+import { db } from "../../configs/firebase";
+import { AuthContext } from "../../provider/AuthProvider";
 
-const ApplicantsEmployee = ({ navigation }) => {
-  const [savedJobList, setSavedJobList] = useState(data);
+export default function SavedJobsClient({ navigation }) {
+  const [savedJobList, setSavedJobList] = useState([]);
+  const { uid } = React.useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+  const [jobids, setJobId] = useState([]);
 
-  const data = [
-    {
-      id: "1",
-      title: "Software Engineer",
-      company: "Tech Corp",
-      location: "San Francisco, CA",
-    },
-    {
-      id: "2",
-      title: "Product Manager",
-      company: "Innovate Ltd",
-      location: "New York, NY",
-    },
-    // ... more jobs
-  ];
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const ids = useMemo(() => jobids.map((job) => job.id), [jobids]);
+
+  async function fetchPosts() {
+    setLoading(true);
+      try {
+        // Fetch the client's username from the 'clients' collection
+        const docSnapshot = await db.collection("clients").doc(uid).get();
+        let userName = "";
+        if (docSnapshot.exists) {
+          userName = docSnapshot.data().nickName;
+        }
+      const querySnapshot = await db
+        .collection("savedJobs")
+        .where("uid", "==", uid)
+        .get();
+        let postid = [];
+        if (docSnapshot.exists) {
+          postid = docSnapshot.data().id;
+        }
+
+    const ids = postid.map((postid) => postid.id);
+
+    try {
+      const querySnapshot = await db
+        .collection("savedJobPost")
+        .where("id", "==", ids)
+        .get();
+
+      const posts = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setSavedJobList(posts);
+      console.log(posts);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
+    setLoading(false);
+  }
 
   const renderItem = ({ item }) => (
     <Layout style={styles.container}>
       <TouchableNativeFeedback onPress={() => console.log("Pressed item")}>
-        <View style={styles.recommendationItem}>
+        <View style={styles.savedPost}>
           <View
             style={{
               flexDirection: "row",
@@ -47,8 +82,10 @@ const ApplicantsEmployee = ({ navigation }) => {
             </Text>
             <Button
               appearance="ghost"
-              accessoryLeft={(props) => <Icon {...props} name="bell-outline" />}
-              onPress={() => console.log("Notification pressed")}
+              accessoryLeft={(props) => (
+                <Icon {...props} name="bookmark-outline" />
+              )}
+              onPress={() => handleAddToWishlist(item.id, item.user)}
             />
           </View>
           <Text category="p2">Posed Date: {item.date}</Text>
@@ -78,12 +115,15 @@ const ApplicantsEmployee = ({ navigation }) => {
           data={savedJobList}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
+          refreshControl={
+            <RefreshControl refreshing={loading} onRefresh={fetchPosts} />
+          }
+          contentContainerStyle={styles.listContainer}
         />
       </Layout>
     </Screen>
   );
-};
-
+}
 const styles = StyleSheet.create({
   container: {
     margin: 10,
@@ -124,7 +164,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginTop: 9,
   },
-  recommendationItem: {
+  savedPost: {
     marginTop: 10,
     padding: 19,
     paddingHorizontal: 15,
@@ -136,6 +176,7 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     borderColor: "gray",
   },
+  listContainer: {
+    paddingBottom: 20,
+  },
 });
-
-export default ApplicantsEmployee;

@@ -55,8 +55,10 @@ export default function ProfileClient({ navigation }) {
     try {
       await db.collection("employees").doc(uid).set(userData);
       console.log("Profile updated:", uid);
+      alert("Profile update Successfully.");
     } catch (error) {
       console.error("Error updating profile:", error);
+      alert("Permission to access camera roll is required.");
     }
   };
 

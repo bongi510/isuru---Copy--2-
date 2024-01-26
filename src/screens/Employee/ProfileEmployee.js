@@ -139,6 +139,15 @@ export default function ProfileClient({ navigation }) {
             style={{ marginTop: 36, marginHorizontal: 50 }}
             accessoryRight={NextIcon}
             onPress={EditProfile}
+            disabled={
+              !name ||
+              !email ||
+              !nickName ||
+              !phoneNumber ||
+              !password ||
+              !name ||
+              !phoneNumber
+            }
           >
             Update Profile
           </Button>

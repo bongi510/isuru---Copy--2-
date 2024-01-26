@@ -8,14 +8,22 @@ import {
   StyleSheet,
   TouchableNativeFeedback,
   RefreshControl,
+  ScrollView,
 } from "react-native";
-import { Divider, Layout, Text, Button } from "@ui-kitten/components";
+import {
+  Divider,
+  Layout,
+  Text,
+  Button,
+  Icon,
+  Modal,
+  Card,
+} from "@ui-kitten/components";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../../configs/firebase";
 import Screen from "../../components/Screen";
 import { AuthContext } from "../../provider/AuthProvider";
-// import { StatusBar } from "expo-status-bar";
-// import recommendationsData from "../../configs/recommendationsData.json";
+import { StatusBar } from "expo-status-bar";
 
 const Header = ({ profileImageUrl }) => {
   const { uid } = React.useContext(AuthContext);
@@ -65,7 +73,7 @@ const Header = ({ profileImageUrl }) => {
           <View
             style={{
               marginLeft: 30,
-              height: 20,
+              height: 30,
               marginBottom: 20,
             }}
           >
@@ -120,9 +128,11 @@ const Header = ({ profileImageUrl }) => {
 
 export default function Home({ navigation }) {
   const [profileImageUrl, setProfileImageUrl] = useState(null);
-  const [searchText, setSearchText] = useState("");
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { uid } = React.useContext(AuthContext);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     fetchProfileImage();
@@ -130,8 +140,6 @@ export default function Home({ navigation }) {
   }, []);
 
   const fetchProfileImage = async () => {
-    // Fetch the profile image URL from Firebase Firestore using the user's ID
-    // This is a placeholder function, replace with your actual Firebase Firestore fetch logic
     const imageUrl =
       "https://assets-global.website-files.com/650865454c2393ac25711ff7/650865454c2393ac25714a3e_The%20best%20selfie%20Ideas%20for%20sm%20pfp.jpeg"; // Replace with actual image URL
     setProfileImageUrl(imageUrl);
@@ -145,17 +153,31 @@ export default function Home({ navigation }) {
         id: doc.id,
         ...doc.data(),
       }));
-      // Assuming you have a state setter function for storing the fetched posts
+
       setRecommendations(recommendationsData);
     } catch (e) {
       console.error("Error fetching posts:", e);
     }
-    setLoading(false); // End loading
+    setLoading(false);
   };
-  console.log(recommendations);
+  // console.log(recommendations);
 
-  const handleSearch = (text) => {
-    setSearchText(text);
+  const handleAddToWishlist = async (id, user) => {
+    try {
+      await db.collection("savedJobs").doc(id).set({ id, user, uid });
+      console.log("Job added successfully");
+    } catch (error) {
+      console.error("Error added document:", error);
+    }
+  };
+
+  const handleModal = (item) => {
+    setSelectedItem(item);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
   };
 
   const renderItem = ({ item }) => (
@@ -165,21 +187,38 @@ export default function Home({ navigation }) {
         paddingBottom: 10,
       }}
     >
-      <TouchableNativeFeedback onPress={() => console.log("Pressed item")}>
+      <TouchableNativeFeedback onPress={() => handleModal(item)}>
         <View style={styles.recommendationItem}>
-          <Text
-            category="h5"
+          <View
             style={{
-              fontWeight: "bold",
-              marginBottom: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
             }}
           >
-            {item.jobTitle}
-          </Text>
+            <View>
+              <Text
+                category="h6"
+                style={{
+                  fontWeight: "bold",
+                }}
+              >
+                {item.jobTitle}
+              </Text>
+              <Text
+                category="p2"
+                style={{
+                  fontWeight: "500",
+                  marginBottom: 5,
+                }}
+              >
+                {item.cliName}
+              </Text>
+            </View>
+          </View>
           <Divider />
-          <Text>{item.duration} Hours </Text>
-          <Text>{item.location}</Text>
-          <Text>{item.city}</Text>
+          <Text category="c1">{item.duration} Hours </Text>
+          <Text category="c1">{item.location}</Text>
+          <Text category="c1">{item.city}</Text>
           <Text
             category="p2"
             style={{
@@ -194,18 +233,48 @@ export default function Home({ navigation }) {
               alignItems: "flex-start",
             }}
           >
-            <Button
-              size="tiny"
+            <View
               style={{
-                marginHorizontal: 5,
-                padding: 3,
-                marginVertical: 4,
+                flexDirection: "row",
+                alignItems: "stretch",
+                justifyContent: "fle",
               }}
-              status={"success"}
-              appearance="outline"
             >
-              {item.employmentType}
-            </Button>
+              <Button
+                size="tiny"
+                style={{
+                  marginHorizontal: 5,
+                  padding: 3,
+                  marginVertical: 4,
+                }}
+                status={"success"}
+                appearance="outline"
+              >
+                {item.employmentType}
+              </Button>
+              <View
+                style={{
+                  alignItems: "flex-end",
+                }}
+              >
+                <Button
+                  size="tiny"
+                  style={{
+                    marginHorizontal: 5,
+                    marginLeft: "60%",
+                    alignItems: "flex-end",
+                    padding: 3,
+                    marginVertical: 4,
+                  }}
+                  accessoryLeft={(props) => (
+                    <Icon {...props} name="bookmark-outline" />
+                  )}
+                  status="warning"
+                  appearance="outline"
+                  onPress={() => handleAddToWishlist(item.id, item.user)}
+                />
+              </View>
+            </View>
           </View>
         </View>
       </TouchableNativeFeedback>
@@ -214,12 +283,6 @@ export default function Home({ navigation }) {
   const renderHeader = () => (
     <>
       <Header profileImageUrl={profileImageUrl} />
-      <TextInput
-        style={styles.searchBar}
-        placeholder="Search"
-        value={searchText}
-        onChangeText={handleSearch}
-      />
       <Divider />
     </>
   );
@@ -241,6 +304,108 @@ export default function Home({ navigation }) {
           contentContainerStyle={styles.listContainer}
         />
       </Layout>
+      <Modal
+        style={{
+          alignItems: "center",
+          height: "75%",
+          width: "100%",
+          marginHorizontal: 10,
+          marginVertical: 10,
+
+          padding: "5%",
+          alignItems: "center",
+        }}
+        visible={isModalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose
+        backdropStyle={styles.backdrop}
+        onBackdropPress={closeModal}
+      >
+        <Card disabled={true}>
+          <ScrollView>
+            <View
+              style={{
+                padding: 2,
+                flex: 1,
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: "90%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderWidth: 1,
+                  borderRadius: 20,
+                  borderColor: "#2CCFA1",
+                  padding: 15,
+                }}
+              >
+                <Text category="h5">{selectedItem?.jobTitle}</Text>
+                <Text category="p2">{selectedItem?.cliName}</Text>
+                <Text category="c1">{selectedItem?.location}</Text>
+                <Text category="p1">{selectedItem?.city}</Text>
+                <Text
+                  category="p2"
+                  style={{
+                    margin: 3,
+                    fontWeight: "bold",
+                    marginBottom: 3,
+                  }}
+                  status="success"
+                >
+                  Rs: {selectedItem?.salary}/=(Per Day)
+                </Text>
+                <Button size={"tiny"} category="c2">
+                  {selectedItem?.employmentType}
+                </Button>
+              </View>
+              <View>
+                <Divider style={{ marginTop: 10 }} />
+                <Text
+                  category="p1"
+                  style={{ marginTop: 12, fontWeight: "bold" }}
+                >
+                  Job Description
+                </Text>
+                <Text category="c1" style={{ marginTop: 12 }}>
+                  {selectedItem?.description}
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: 30,
+                  }}
+                >
+                  <Button
+                    size="small"
+                    status="danger"
+                    style={{
+                      marginHorizontal: 10,
+                      padding: 3,
+                      marginVertical: 4,
+                    }}
+                  >
+                    Apply
+                  </Button>
+                  <Button
+                    size="small"
+                    accessoryLeft={(props) => (
+                      <Icon {...props} name="navigation-2-outline" />
+                    )}
+                    status="success"
+                    appearance="filled"
+                  />
+                </View>
+              </View>
+            </View>
+          </ScrollView>
+        </Card>
+      </Modal>
+      {/* <StatusBar animated={true} hidden={true} /> */}
     </Screen>
   );
 }
@@ -293,5 +458,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 9,
     borderColor: "gray",
+  },
+  backdrop: {
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
 });

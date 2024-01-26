@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -47,8 +47,16 @@ export default function ({ navigation }) {
       employmentType === "Part-Time" ? "Full-Time" : "Part-Time"
     );
   };
+
   const publishPost = async () => {
     try {
+      // Fetch the client's username from the 'clients' collection
+      const docSnapshot = await db.collection("clients").doc(uid).get();
+      let userName = "";
+      if (docSnapshot.exists) {
+        userName = docSnapshot.data().nickName;
+      }
+
       const publishData = {
         jobTitle: displayValue,
         city: displayCityValue,
@@ -57,10 +65,12 @@ export default function ({ navigation }) {
         employmentType: employmentType,
         duration: duration,
         description: description,
+        cliName: userName,
         user: uid,
         postedTime: firebase.firestore.Timestamp.now(), // Current timestamp
       };
-      // Create a new document with a unique ID in the 'posts' subcollection for the user
+
+      // Create a new document with a unique ID in the 'JobPost' collection
       await db.collection("JobPost").add(publishData);
       console.log("Post published successfully");
       alert("Post published successfully");
@@ -72,7 +82,6 @@ export default function ({ navigation }) {
       setDuration("");
       setDescription("");
     } catch (e) {
-      // Replace this with your actual error handling function
       console.error("Error publishing post:", e);
     }
   };
