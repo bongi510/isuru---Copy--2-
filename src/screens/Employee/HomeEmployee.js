@@ -240,7 +240,7 @@ export default function HomeScreen({ navigation }) {
           alignItems: "center",
         }}
         visible={isModalVisible}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         onRequestClose
         backdropStyle={styles.backdrop}

@@ -1,7 +1,7 @@
 // ChatListScreen.js
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, FlatList, TouchableOpacity } from "react-native";
-import { Layout, Text, Avatar } from "@ui-kitten/components";
+import { Layout, Text, Avatar, Button } from "@ui-kitten/components";
 import { ChatScreen } from "../../components/ChatCard";
 
 export default function ({ navigation }) {

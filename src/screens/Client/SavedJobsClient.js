@@ -15,6 +15,7 @@ export default function SavedJobsClient({ navigation }) {
   const [savedJobList, setSavedJobList] = useState([]);
   const { uid } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  // const [jobPostIds, setjobPostIds] = useState();
 
   useEffect(() => {
     fetchPosts();
@@ -31,14 +32,13 @@ export default function SavedJobsClient({ navigation }) {
 
       // Extract the job post IDs from the saved job references
       const jobPostIds = savedJobsSnapshot.docs.map((doc) => doc.data().id);
-      console.log(JSON.stringify(jobPostIds, null, "\t"));
+
       // Fetch the full job post details for each saved job
 
       const jobPostsPromises = jobPostIds.map((jobPostId) =>
-        db.collection("jobPost").doc(jobPostId).get()
+        db.collection("JobPost").doc(jobPostId).get()
       );
-      console.log(JSON.stringify(jobPostsPromises, null, "\t"));
-      // Resolve all promises to get the job post details
+
       const jobPostsSnapshots = await Promise.all(jobPostsPromises);
 
       // Map over the snapshots to get the job post data
@@ -49,13 +49,27 @@ export default function SavedJobsClient({ navigation }) {
 
       // Update the state with the fetched job posts
       setSavedJobList(jobPosts);
+
+      console.log(jobPosts);
     } catch (error) {
       console.error("Error fetching saved jobs:", error);
     }
     setLoading(false);
   }
 
-  const handleAddToWishlist = async (id, user) => {
+  const getSaveJobData = async () => {
+    try {
+      console.log(jobPostIds);
+      const savedJobsSnapshotData = await db
+        .collection("jobPosts")
+        .where("id", "==", jobPostIds)
+        .get();
+    } catch (error) {
+      console.error("Error deleted document:", error);
+    }
+  };
+
+  const handleRemoveToWishlist = async (id, user) => {
     try {
       await db.collection("savedJobs").doc(id).delete({ id, user, uid });
       console.log("Job deleted successfully");
@@ -80,19 +94,18 @@ export default function SavedJobsClient({ navigation }) {
                 fontWeight: "bold",
               }}
             >
-              {item.title}
+              {item.jobTitle}
             </Text>
             <Button
               appearance="ghost"
               accessoryLeft={(props) => (
                 <Icon {...props} name="bookmark-outline" />
               )}
-              onPress={() => handleAddToWishlist(item.id, item.user)}
+              onPress={() => handleRemoveToWishlist(item.id, item.user)}
             />
           </View>
-          <Text category="p2">Posed Date: {item.date}</Text>
           <Divider />
-          <Text>{item.hours} Hours </Text>
+          <Text>{item.duration} Hours </Text>
           <Text>{item.location} hours</Text>
           <Text>{item.city}</Text>
           <Text
@@ -104,7 +117,6 @@ export default function SavedJobsClient({ navigation }) {
           >
             Rs:{item.salary} /= (Per Day)
           </Text>
-          <Text>{item.duration}</Text>
         </View>
       </TouchableNativeFeedback>
     </Layout>
