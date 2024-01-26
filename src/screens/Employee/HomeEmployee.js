@@ -307,23 +307,14 @@ export default function HomeScreen({ navigation }) {
                 >
                   <Button
                     size="small"
-                    status="danger"
-                    style={{
-                      marginHorizontal: 10,
-                      padding: 3,
-                      marginVertical: 4,
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    size="small"
                     accessoryLeft={(props) => (
                       <Icon {...props} name="trash-2-outline" />
                     )}
-                    status="success"
+                    status="danger"
                     appearance="filled"
-                  />
+                  >
+                    Delete
+                  </Button>
                 </View>
               </View>
             </View>

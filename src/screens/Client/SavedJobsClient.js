@@ -106,7 +106,7 @@ export default function SavedJobsClient({ navigation }) {
           </View>
           <Divider />
           <Text>{item.duration} Hours </Text>
-          <Text>{item.location} hours</Text>
+          <Text>{item.location}</Text>
           <Text>{item.city}</Text>
           <Text
             category="p2"
@@ -183,9 +183,7 @@ const styles = StyleSheet.create({
     padding: 19,
     paddingHorizontal: 15,
     paddingBottom: 10,
-
-    padding: 10,
-    paddingBottom: 5,
+    paddingVertical: 15,
     borderWidth: 2,
     borderRadius: 9,
     borderColor: "gray",

@@ -67,7 +67,14 @@ export default function ({ navigation }) {
         description: description,
         cliName: userName,
         user: uid,
-        postedTime: firebase.firestore.Timestamp.now(), // Current timestamp
+        employee: [
+          {
+            emp_id: "",
+            is_selected: true,
+            status: 0,
+          },
+        ],
+        postedTime: firebase.firestore.Timestamp.now(),
       };
 
       // Add the new job post to the 'JobPost' collection
