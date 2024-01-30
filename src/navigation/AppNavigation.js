@@ -29,12 +29,10 @@ import HomeEmployee from "../screens/Employee/HomeEmployee";
 import CreatePostEmployee from "../screens/Employee/CreatePostEmployee";
 import ApplicantsEmployee from "../screens/Employee/ApplicantsEmployee";
 import ProfileEmployee from "../screens/Employee/ProfileEmployee";
-import ChatscreenEmpolyee from "../screens/Employee/ChatScreenEmployee";
 
 import HomeClient from "../screens/Client/HomeClient";
 import SavedJobs from "../screens/Client/SavedJobsClient";
 import ProfileClient from "../screens/Client/ProfileClient";
-import ChatscreenClient from "../screens/Client/ChatScreenClient";
 import ApplicationClient from "../screens/Client/ApplicationClient";
 
 const AuthStack = createNativeStackNavigator();
@@ -138,9 +136,7 @@ const EmpBottomTabBar = ({ navigation, state }) => {
   const ApplicantsIconEmp = (props) => (
     <Icon {...props} fill={"rgb(37,176,137)"} name="briefcase-outline" />
   );
-  const ChatIconEmp = (props) => (
-    <Icon {...props} fill={"rgb(37,176,137)"} name="message-square-outline" />
-  );
+
   const ProfileIconEmp = (props) => (
     <Icon {...props} fill={"rgb(37,176,137)"} name="person-outline" />
   );
@@ -156,7 +152,6 @@ const EmpBottomTabBar = ({ navigation, state }) => {
       <BottomNavigationTab icon={HomeIconEmp} title="Home" />
       <BottomNavigationTab icon={CreatePostIconEmp} title="Create Post" />
       <BottomNavigationTab icon={ApplicantsIconEmp} title="Applicants" />
-      <BottomNavigationTab icon={ChatIconEmp} title="Chat" />
       <BottomNavigationTab icon={ProfileIconEmp} title="Profile" />
     </BottomNavigation>
   );
@@ -172,9 +167,6 @@ const CliBottomTabBar = ({ navigation, state }) => {
   const ApplicationIconCli = (props) => (
     <Icon {...props} fill={"rgb(37,176,137)"} name="briefcase" />
   );
-  const ChatIconCli = (props) => (
-    <Icon {...props} fill={"rgb(37,176,137)"} name="message-square" />
-  );
   const ProfileIconCli = (props) => (
     <Icon {...props} fill={"rgb(37,176,137)"} name="person" />
   );
@@ -189,7 +181,6 @@ const CliBottomTabBar = ({ navigation, state }) => {
       <BottomNavigationTab icon={HomeIconCli} title="Home" />
       <BottomNavigationTab icon={SavedIconCli} title="Saved Jobs" />
       <BottomNavigationTab icon={ApplicationIconCli} title="Application" />
-      <BottomNavigationTab icon={ChatIconCli} title="Chat" />
       <BottomNavigationTab icon={ProfileIconCli} title="Profile" />
     </BottomNavigation>
   );
@@ -209,7 +200,6 @@ const MainEmps = () => (
     <Emp.Screen name="HomeEmp" component={HomeEmployee} />
     <Emp.Screen name="CreatePostEmp" component={CreatePostEmployee} />
     <Emp.Screen name="ApplicantsEmp" component={ApplicantsEmployee} />
-    <Emp.Screen name="ChatEmp" component={ChatscreenEmpolyee} />
     <Emp.Screen name="ProfileEmp" component={ProfileEmployee} />
   </Emp.Navigator>
 );
@@ -226,7 +216,6 @@ const MainClis = () => (
     <Cli.Screen name="HomeCli" component={HomeClient} />
     <Cli.Screen name="SavedJobsCli" component={SavedJobs} />
     <Cli.Screen name="ApplicationCli" component={ApplicationClient} />
-    <Cli.Screen name="ChatCli" component={ChatscreenClient} />
     <Cli.Screen name="ProfileCli" component={ProfileClient} />
   </Cli.Navigator>
 );

@@ -70,10 +70,27 @@ export default function HomeScreen({ navigation }) {
       setRecommendations(postsData);
 
       let dataArray = postsData;
-      dataArray.forEach((item) => {
+
+      dataArray.forEach(async (item) => {
         let employeeArray = item.employee;
         let empIds = employeeArray.map((employee) => employee.emp_id);
-        console.log(empIds);
+
+        // Fetch the details of each employee
+        const employeeDetailsPromises = empIds.map((empId) =>
+          db.collection("Employee").doc(empId).get()
+        );
+
+        const employeeDetailsSnapshots = await Promise.all(
+          employeeDetailsPromises
+        );
+
+        // Map over the snapshots to get the employee data
+        const employeeDetails = employeeDetailsSnapshots.map((snapshot) => ({
+          id: snapshot.id,
+          ...snapshot.data(),
+        }));
+
+        console.log(employeeDetails);
       });
     } catch (error) {
       console.error("Error getting documents:", error);
